@@ -19,9 +19,14 @@ public class GameInput : MonoBehaviour
         playerInput.Player.Interact.performed += Interact_performed;
     }
 
+    private void Update()
+    {
+        
+    }
+
     private void Interact_performed(UnityEngine.InputSystem.InputAction.CallbackContext obj)
     {
-        Debug.Log("click");
+       
     }
 
     public Vector2 GetMovementVectorNormalized()
@@ -41,5 +46,14 @@ public class GameInput : MonoBehaviour
     public float GetZoom()
     {
         return playerInput.Player.Zoom.ReadValue<Vector2>().y;
+    }
+
+    public bool InteractPressed()
+    {
+        if(playerInput.Player.Interact.ReadValue<float>() == 1) 
+        {
+            return true;
+        }
+        return false;
     }
 }
