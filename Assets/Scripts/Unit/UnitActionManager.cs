@@ -9,9 +9,12 @@ public class UnitActionManager : MonoBehaviour
 
     [SerializeField] private LayerMask unitLayer;
     [SerializeField] private LayerMask movementLayer;
+    [SerializeField] private float maxActionCooldown = 1f;
 
     private Unit selectedUnit;
     private BaseAction selectedAction;
+
+    private float currentActionCooldown = 0f;
 
     private bool isBusy = false;
 
@@ -23,25 +26,34 @@ public class UnitActionManager : MonoBehaviour
     {
         if(isBusy)
         {
+            currentActionCooldown = 0f;
             return;
         }
-        if (HandleUnitSelection())
+        if(currentActionCooldown <= maxActionCooldown)
         {
-            return;
+            currentActionCooldown += Time.deltaTime;
         }
+        else
+        {
+            if (HandleUnitSelection())
+            {
+                return;
+            }
 
-        if(selectedUnit != null && selectedAction != null)
-        {
-            if (GameInput.Instance.InteractPressed())
+            if (selectedUnit != null && selectedAction != null)
             {
-                selectedAction.PerformAction(SetBusy, ClearBusy);
+                if (GameInput.Instance.InteractPressed())
+                {
+                    selectedAction.PerformAction(SetBusy, ClearBusy);
+                }
+                else
+                {
+                    selectedAction.ActionSelectedVisual();
+                }
+
             }
-            else
-            {
-                selectedAction.ActionSelectedVisual();
-            }
-            
         }
+        
     }
 
     private bool HandleUnitSelection()
