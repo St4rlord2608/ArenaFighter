@@ -33,25 +33,26 @@ public class UnitActionManager : MonoBehaviour
         {
             currentActionCooldown += Time.deltaTime;
         }
-        else
+        if (HandleUnitSelection())
         {
-            if (HandleUnitSelection())
-            {
-                return;
-            }
+            return;
+        }
 
-            if (selectedUnit != null && selectedAction != null)
+        if (selectedUnit != null && selectedAction != null)
+        {
+            if (GameInput.Instance.InteractPressed())
             {
-                if (GameInput.Instance.InteractPressed())
+                if(!(currentActionCooldown <= maxActionCooldown))
                 {
                     selectedAction.PerformAction(SetBusy, ClearBusy);
                 }
-                else
-                {
-                    selectedAction.ActionSelectedVisual();
-                }
-
+                    
             }
+            else
+            {
+                selectedAction.ActionSelectedVisual();
+            }
+
         }
         
     }
