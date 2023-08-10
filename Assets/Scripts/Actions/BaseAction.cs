@@ -34,4 +34,6 @@ public abstract class BaseAction : MonoBehaviour
         isActive = false;
         onActionComplete();
     }
+
+    public abstract string GetActionName();
 }

@@ -87,7 +87,6 @@ public class MoveAction : BaseAction
             var lookingRotation = Mathf.Atan2(lookingPosition.x, lookingPosition.z) * Mathf.Rad2Deg;
             transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.Euler(new Vector3(transform.rotation.x, lookingRotation, transform.rotation.z)), rotationSpeed * Time.deltaTime);
             var angleDifference = ((transform.rotation.eulerAngles.y - lookingRotation) + 360f) % 360;
-            Debug.Log(angleDifference);
             if (angleDifference <= rotationOffset || angleDifference >= 360 - rotationOffset)
             {
                 onStopRotating?.Invoke(this, EventArgs.Empty);
@@ -122,5 +121,10 @@ public class MoveAction : BaseAction
         }
 
         return length;
+    }
+
+    public override string GetActionName()
+    {
+        return "Move";
     }
 }

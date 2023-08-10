@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class UnitActionManager : MonoBehaviour
 {
@@ -18,6 +19,10 @@ public class UnitActionManager : MonoBehaviour
 
     private bool isBusy = false;
 
+    public event EventHandler onSelectedUnitChanged;
+    public event EventHandler onSelectedActionChanged;
+    public event EventHandler<bool> onBusyChanged;
+
     private void Awake()
     {
         Instance = this;
@@ -29,15 +34,20 @@ public class UnitActionManager : MonoBehaviour
             currentActionCooldown = 0f;
             return;
         }
+
+        if(EventSystem.current.IsPointerOverGameObject())
+        {
+            return;
+        }
         if(currentActionCooldown <= maxActionCooldown)
         {
             currentActionCooldown += Time.deltaTime;
         }
         if (HandleUnitSelection())
         {
+            currentActionCooldown = 0f;
             return;
         }
-
         if (selectedUnit != null && selectedAction != null)
         {
             if (GameInput.Instance.InteractPressed())
@@ -64,12 +74,12 @@ public class UnitActionManager : MonoBehaviour
         {
             if (GameInput.Instance.InteractPressed())
             {
-                if (hitInfo.transform.TryGetComponent<Unit>(out Unit unit))
+                if (hitInfo.transform.TryGetComponent<Unit>(out Unit unit) && unit != selectedUnit)
                 {
-                    selectedUnit = unit;
+                    SetSelectedUnit(unit);
                     if(unit.transform.TryGetComponent<MoveAction>(out MoveAction moveAction))
                     {
-                        selectedAction = moveAction;
+                        SetSelectedAction(moveAction);
                     }
                     return true;
                 }
@@ -81,10 +91,36 @@ public class UnitActionManager : MonoBehaviour
     private void ClearBusy()
     {
         isBusy = false;
+        onBusyChanged?.Invoke(this, isBusy);
     }
 
     private void SetBusy()
     {
         isBusy = true;
+        onBusyChanged?.Invoke(this, isBusy);
+    }
+
+    public void SetSelectedAction(BaseAction action)
+    {
+        selectedAction = action;
+        onSelectedActionChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    public BaseAction GetSelectedAction()
+    {
+        return selectedAction;
+    }
+
+    private void SetSelectedUnit(Unit unit)
+    {
+        selectedUnit = unit;
+        SetSelectedAction(unit.GetMoveAction());
+        onSelectedUnitChanged?.Invoke(this, EventArgs.Empty);
+
+    }
+
+    public Unit GetSelectedUnit()
+    {
+        return selectedUnit;
     }
 }
