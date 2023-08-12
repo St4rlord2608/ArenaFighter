@@ -12,10 +12,12 @@ GameObject:
   - component: {fileID: 8486778844139964230}
   - component: {fileID: 2017305532823828850}
   - component: {fileID: 7687030772898386598}
+  - component: {fileID: 4739502214851151660}
   - component: {fileID: 5245882075988542198}
   - component: {fileID: 5531873799042518325}
   - component: {fileID: 2214317169163977192}
   - component: {fileID: 2737821758962995725}
+  - component: {fileID: -4556495488562700563}
   m_Layer: 3
   m_Name: Unit
   m_TagString: Untagged
@@ -73,6 +75,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 772fb2d7a076972468cbbd1c251d31f2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isEnemy: 0
+  maxMoveDistance: 10
+  maxSpinAmount: 2
 --- !u!114 &7687030772898386598
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -90,6 +95,18 @@ MonoBehaviour:
     m_Bits: 64
   rotationSpeed: 5
   rotationOffset: 10
+--- !u!114 &4739502214851151660
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3893808597695861886}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e1e17806807f18468db344f8c0d0ad5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &5245882075988542198
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -130,7 +147,7 @@ MonoBehaviour:
   traversableTags: -1
   tagPenalties: 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   graphMask:
-    value: -1
+    value: 1
 --- !u!114 &2214317169163977192
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -158,7 +175,7 @@ MonoBehaviour:
   orientation: 0
   enableRotation: 1
   autoRepath:
-    mode: 2
+    mode: 0
     period: 0.5
     sensitivity: 10
     maximumPeriod: 2
@@ -286,6 +303,22 @@ LineRenderer:
   m_UseWorldSpace: 1
   m_Loop: 0
   m_ApplyActiveColorSpace: 1
+--- !u!114 &-4556495488562700563
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3893808597695861886}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 183748dd497aa473a98ff0cd8cb67fc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  version: 1
+  uniqueID: 5091464691183752480
+  updateError: 1
+  checkTime: 0.2
 --- !u!1001 &832890724982038369
 PrefabInstance:
   m_ObjectHideFlags: 0

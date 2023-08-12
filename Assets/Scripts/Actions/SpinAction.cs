@@ -8,6 +8,12 @@ public class SpinAction : BaseAction
 
     private float totalSpinAmount;
 
+    protected override void Awake()
+    {
+        base.Awake();
+        SetActionPointsCost(2);
+    }
+
     private void Update()
     {
         if (!isActive)
@@ -31,13 +37,11 @@ public class SpinAction : BaseAction
 
     public override string GetActionName()
     {
-        return "Spin";
+        return Unit.SPIN_ACTION;
     }
 
     public override void PerformAction(Action onActionStart, Action onActionComplete)
     {
         ActionStart(onActionStart, onActionComplete);
-
-
     }
 }

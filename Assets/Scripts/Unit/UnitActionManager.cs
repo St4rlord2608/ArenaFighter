@@ -11,6 +11,9 @@ public class UnitActionManager : MonoBehaviour
     [SerializeField] private LayerMask unitLayer;
     [SerializeField] private LayerMask movementLayer;
     [SerializeField] private float maxActionCooldown = 1f;
+    [Space]
+    [SerializeField] private int unitLayerIndex = 3;
+    [SerializeField] private int selectedUnitLayerIndex = 7;
 
     private Unit selectedUnit;
     private BaseAction selectedAction;
@@ -48,15 +51,35 @@ public class UnitActionManager : MonoBehaviour
             currentActionCooldown = 0f;
             return;
         }
+        HandleSelectedAction();
+        
+    }
+
+    private void HandleSelectedAction()
+    {
         if (selectedUnit != null && selectedAction != null)
         {
             if (GameInput.Instance.InteractPressed())
             {
-                if(!(currentActionCooldown <= maxActionCooldown))
+                if (!(currentActionCooldown <= maxActionCooldown))
                 {
-                    selectedAction.PerformAction(SetBusy, ClearBusy);
+                    if (selectedAction.GetActionName() == Unit.MOVE_ACTION)
+                    {
+                        if (selectedUnit.CanSpendActionPoints(selectedAction))
+                        {
+                            selectedAction.PerformAction(SetBusy, ClearBusy);
+                        }
+                    }
+                    else
+                    {
+                        if (selectedUnit.TryToSpendActionPointsToTakeAction(selectedAction))
+                        {
+                            selectedAction.PerformAction(SetBusy, ClearBusy);
+                        }
+                    }
+
                 }
-                    
+
             }
             else
             {
@@ -64,7 +87,6 @@ public class UnitActionManager : MonoBehaviour
             }
 
         }
-        
     }
 
     private bool HandleUnitSelection()
@@ -76,6 +98,10 @@ public class UnitActionManager : MonoBehaviour
             {
                 if (hitInfo.transform.TryGetComponent<Unit>(out Unit unit) && unit != selectedUnit)
                 {
+                    if (unit.IsEnemy())
+                    {
+                        return false;
+                    }
                     SetSelectedUnit(unit);
                     if(unit.transform.TryGetComponent<MoveAction>(out MoveAction moveAction))
                     {
@@ -122,5 +148,15 @@ public class UnitActionManager : MonoBehaviour
     public Unit GetSelectedUnit()
     {
         return selectedUnit;
+    }
+
+    public int GetSelectedUnitLayerIndex()
+    {
+        return selectedUnitLayerIndex;
+    }
+
+    public int GetUnitLayerIndex()
+    {
+        return unitLayerIndex;
     }
 }

@@ -20,6 +20,10 @@ public class MoveAction : BaseAction
     private LineRenderer lineRenderer;
 
     private bool startMoving;
+    private bool isAboveAvailableLength;
+
+    private float activePathMaxDistance;
+    private float currentPathLength;
 
     public event EventHandler onStartRotating;
     public event EventHandler onStopRotating;
@@ -40,13 +44,27 @@ public class MoveAction : BaseAction
             lineRenderer.enabled = false;
             return;
         }
+        ProcessPath();
         MoveUnit();
-        if (GetLengthOfPath() <= 0)
+        if (currentPathLength <= 0)
         {
-            startMoving = false;
-            ActionComplete();
-            onStopMoving?.Invoke(this, EventArgs.Empty);
+            HandleActionComplete();
+        }else if(activePathMaxDistance - currentPathLength >= unit.GetAvailableActionPoints(this))
+        {
+            HandleActionComplete();
+            unit.SetAvailableActionPoints(this, 0f);
         }
+        SetActionPointsCost(activePathMaxDistance - currentPathLength);
+        Debug.Log(actionPointsCost);
+        unit.TryToSpendActionPointsToTakeAction(this);
+        activePathMaxDistance = activePathMaxDistance - (activePathMaxDistance - currentPathLength);
+    }
+
+    private void HandleActionComplete()
+    {
+        startMoving = false;
+        ActionComplete();
+        onStopMoving?.Invoke(this, EventArgs.Empty);
     }
 
     public override void ActionSelectedVisual()
@@ -58,9 +76,9 @@ public class MoveAction : BaseAction
             richAi.canMove = false;
             richAi.enableRotation = false;
             richAi.destination = hitInfo.point;
+            richAi.SearchPath();
         }
-        DisplayMovementPath();
-        float length = GetLengthOfPath();
+        ProcessPath();
     }
 
     public override void PerformAction(Action onActionStart, Action onActionComplete)
@@ -69,12 +87,14 @@ public class MoveAction : BaseAction
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         if (Physics.Raycast(ray, out RaycastHit hitInfo, Mathf.Infinity, movementLayer))
         {
-            onStartRotating?.Invoke(this, EventArgs.Empty);
-            ActionStart(onActionStart, onActionComplete);
-            
-            richAi.destination = hitInfo.point;
+            ProcessPath();
+            activePathMaxDistance = currentPathLength;
+            if (!(unit.GetAvailableActionPoints(this) <= 0))
+            {
+                onStartRotating?.Invoke(this, EventArgs.Empty);
+                ActionStart(onActionStart, onActionComplete);
+            }
 
-            DisplayMovementPath();
         }
     }
 
@@ -101,30 +121,45 @@ public class MoveAction : BaseAction
         }
     }
 
-    private void DisplayMovementPath()
+    private void ProcessPath()
     {
         richAi.GetRemainingPath(buffer, out bool stale);
-        lineRenderer.positionCount = buffer.Count;
-        lineRenderer.SetPositions(buffer.ToArray());
-    }
-
-    private float GetLengthOfPath()
-    {
-        DisplayMovementPath();
-        float length = 0f;
+        List<Vector3> linePositions = new List<Vector3>();
+        currentPathLength = 0f;
         if (buffer.Count >= 2)
         {
-            for (int i = 0; i < buffer.Count - 1; i++)
+            int i = 0;
+            for (; i < buffer.Count - 1; i++)
             {
-                length += Vector3.Distance(buffer[i], buffer[i + 1]);
+                currentPathLength += Vector3.Distance(buffer[i], buffer[i + 1]);
+                if (isAboveAvailableLength)
+                {
+                    continue;   
+                }
+                linePositions.Add(buffer[i]);
+                float lengthOfCurrentIteration = Vector3.Distance(buffer[i], buffer[i + 1]);
+                SetActionPointsCost(currentPathLength);
+                if (!unit.CanSpendActionPoints(this))
+                {
+                    Vector3 dir = (buffer[i + 1] - buffer[i]).normalized;
+                    float lengthToAdd = unit.GetAvailableActionPoints(this) - (currentPathLength - lengthOfCurrentIteration);
+                    linePositions.Add(buffer[i] + (dir * lengthToAdd));
+                    isAboveAvailableLength = true;
+                    SetActionPointsCost((currentPathLength - lengthOfCurrentIteration) + lengthToAdd);
+                }
             }
+            if (!isAboveAvailableLength)
+            {
+                linePositions.Add(buffer[i]);
+            }
+            isAboveAvailableLength = false;
+
         }
-
-        return length;
+        lineRenderer.positionCount = linePositions.Count;
+        lineRenderer.SetPositions(linePositions.ToArray());
     }
-
     public override string GetActionName()
     {
-        return "Move";
+        return Unit.MOVE_ACTION;
     }
 }
