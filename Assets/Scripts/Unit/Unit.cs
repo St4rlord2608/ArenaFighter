@@ -34,6 +34,17 @@ public class Unit : MonoBehaviour
     private void Start()
     {
         UnitActionManager.Instance.onSelectedUnitChanged += UnitActionManager_onSelectedUnitChanged;
+        TurnSystem.Instance.onTurnChanged += TurnSystem_onTurnChanged;
+    }
+
+    private void TurnSystem_onTurnChanged(object sender, EventArgs e)
+    {
+        if((IsEnemy() && !TurnSystem.Instance.IsPlayerTurn()) ||
+            (!IsEnemy() && TurnSystem.Instance.IsPlayerTurn()))
+        {
+            ResetActionPoints();
+            onAnyActionPointsChanged?.Invoke(this, EventArgs.Empty);
+        }
     }
 
     private void UnitActionManager_onSelectedUnitChanged(object sender, EventArgs e)

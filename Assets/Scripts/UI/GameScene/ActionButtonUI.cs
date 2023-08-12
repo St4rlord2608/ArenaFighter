@@ -26,6 +26,12 @@ public class ActionButtonUI : MonoBehaviour
     public void UpdateSelectedVisual()
     {
         BaseAction selectedBaseAction = UnitActionManager.Instance.GetSelectedAction();
+        if(selectedTransform.gameObject.activeSelf && selectedBaseAction == action)
+        {
+            selectedTransform.gameObject.SetActive(false);
+            UnitActionManager.Instance.SetSelectedAction(null);
+            return;
+        }
         selectedTransform.gameObject.SetActive(selectedBaseAction == action);
     }
 }

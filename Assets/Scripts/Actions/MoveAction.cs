@@ -55,7 +55,6 @@ public class MoveAction : BaseAction
             unit.SetAvailableActionPoints(this, 0f);
         }
         SetActionPointsCost(activePathMaxDistance - currentPathLength);
-        Debug.Log(actionPointsCost);
         unit.TryToSpendActionPointsToTakeAction(this);
         activePathMaxDistance = activePathMaxDistance - (activePathMaxDistance - currentPathLength);
     }

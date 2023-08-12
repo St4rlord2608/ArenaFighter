@@ -25,8 +25,15 @@ public class UnitActionSystemUI : MonoBehaviour
         UnitActionManager.Instance.onSelectedActionChanged += UnitActionManager_onSelectedActionChanged;
         UnitActionManager.Instance.onBusyChanged += UnitActionManager_onBusyChanged;
         Unit.onAnyActionPointsChanged += Unit_onAnyActionPointsChanged;
+        TurnSystem.Instance.onTurnChanged += TurnSystem_onTurnChanged;
 
         CreateUnitActionButtons();
+    }
+
+    private void TurnSystem_onTurnChanged(object sender, System.EventArgs e)
+    {
+        actionButtonContainerTransform.gameObject.SetActive(TurnSystem.Instance.IsPlayerTurn());
+        UpdateActionPoints();
     }
 
     private void Unit_onAnyActionPointsChanged(object sender, System.EventArgs e)
@@ -92,7 +99,7 @@ public class UnitActionSystemUI : MonoBehaviour
     {
         Unit selectedUnit = UnitActionManager.Instance.GetSelectedUnit();
         BaseAction selectedAction = UnitActionManager.Instance.GetSelectedAction();
-        if(selectedUnit == null ||selectedAction == null)
+        if(selectedUnit == null ||selectedAction == null || !TurnSystem.Instance.IsPlayerTurn())
         {
             actionPointsText.gameObject.SetActive(false);
             return;

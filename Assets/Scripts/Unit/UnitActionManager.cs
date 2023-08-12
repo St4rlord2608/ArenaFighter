@@ -37,6 +37,12 @@ public class UnitActionManager : MonoBehaviour
             currentActionCooldown = 0f;
             return;
         }
+        if (!TurnSystem.Instance.IsPlayerTurn())
+        {
+            SetSelectedAction(null);
+            SetSelectedUnit(null);
+            return;
+        }
 
         if(EventSystem.current.IsPointerOverGameObject())
         {
@@ -103,10 +109,6 @@ public class UnitActionManager : MonoBehaviour
                         return false;
                     }
                     SetSelectedUnit(unit);
-                    if(unit.transform.TryGetComponent<MoveAction>(out MoveAction moveAction))
-                    {
-                        SetSelectedAction(moveAction);
-                    }
                     return true;
                 }
             }
@@ -140,7 +142,7 @@ public class UnitActionManager : MonoBehaviour
     private void SetSelectedUnit(Unit unit)
     {
         selectedUnit = unit;
-        SetSelectedAction(unit.GetMoveAction());
+        SetSelectedAction(null);
         onSelectedUnitChanged?.Invoke(this, EventArgs.Empty);
 
     }
