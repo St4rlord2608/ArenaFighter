@@ -863,7 +863,7 @@ MonoBehaviour:
   m_BlendUpdateMethod: 1
   m_DefaultBlend:
     m_Style: 1
-    m_Time: 2
+    m_Time: 1
     m_CustomCurve:
       serializedVersion: 2
       m_Curve: []
@@ -1821,6 +1821,78 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 586967563}
   m_CullTransparentMesh: 1
+--- !u!1 &594596458
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 594596460}
+  - component: {fileID: 594596459}
+  m_Layer: 0
+  m_Name: ShootingCamera
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!114 &594596459
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 594596458}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 45e653bab7fb20e499bda25e1b646fea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_ExcludedPropertiesInInspector:
+  - m_Script
+  m_LockStageInInspector: 
+  m_StreamingVersion: 20170927
+  m_Priority: 40
+  m_StandbyUpdate: 2
+  m_LookAt: {fileID: 8520421511265712362}
+  m_Follow: {fileID: 8520421511265712362}
+  m_Lens:
+    FieldOfView: 60.000004
+    OrthographicSize: 10
+    NearClipPlane: 0.1
+    FarClipPlane: 5000
+    Dutch: 0
+    ModeOverride: 0
+    LensShift: {x: 0, y: 0}
+    GateFit: 2
+    FocusDistance: 10
+    m_SensorSize: {x: 1, y: 1}
+  m_Transitions:
+    m_BlendHint: 0
+    m_InheritPosition: 0
+    m_OnCameraLive:
+      m_PersistentCalls:
+        m_Calls: []
+  m_LegacyBlendHint: 0
+  m_ComponentOwner: {fileID: 1514479044}
+--- !u!4 &594596460
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 594596458}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.16018225, y: 0.000000023309845, z: -0.000000003782667, w: 0.9870875}
+  m_LocalPosition: {x: 0.25, y: 1.821, z: -1.5}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1514479044}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &640537744
 GameObject:
   m_ObjectHideFlags: 0
@@ -2547,7 +2619,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   version: 1
   data:
-    dataString: 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
+    dataString: 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
     upgradeData: 
     file_cachedStartup: {fileID: 0}
     data_cachedStartup: 
@@ -3343,6 +3415,101 @@ MonoBehaviour:
   rotationSpeed: 100
   minFollowYOffset: 2
   maxFollowYOffset: 12
+--- !u!1 &1514479043
+GameObject:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1514479044}
+  - component: {fileID: 1514479047}
+  - component: {fileID: 1514479046}
+  - component: {fileID: 1514479045}
+  m_Layer: 0
+  m_Name: cm
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1514479044
+Transform:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1514479043}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 594596460}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1514479045
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1514479043}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fa7155796051b734daa718462081dc5f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_BindingMode: 1
+  m_FollowOffset: {x: 0, y: 0.5, z: -1.5}
+  m_XDamping: 0
+  m_YDamping: 0
+  m_ZDamping: 0
+  m_AngularDampingMode: 0
+  m_PitchDamping: 0
+  m_YawDamping: 0
+  m_RollDamping: 0
+  m_AngularDamping: 0
+--- !u!114 &1514479046
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1514479043}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4044717213e31446939f7bd49c896ea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_TrackedObjectOffset: {x: 0, y: 0, z: 0}
+  m_LookaheadTime: 0
+  m_LookaheadSmoothing: 0
+  m_LookaheadIgnoreY: 0
+  m_HorizontalDamping: 0.5
+  m_VerticalDamping: 0.5
+  m_ScreenX: 0.5
+  m_ScreenY: 0.5
+  m_DeadZoneWidth: 0
+  m_DeadZoneHeight: 0
+  m_SoftZoneWidth: 0.8
+  m_SoftZoneHeight: 0.8
+  m_BiasX: 0
+  m_BiasY: 0
+  m_CenterOnActivate: 1
+--- !u!114 &1514479047
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1514479043}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac0b09e7857660247b1477e93731de29, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1518658090
 GameObject:
   m_ObjectHideFlags: 0
@@ -4694,6 +4861,7 @@ MonoBehaviour:
     m_Bits: 64
   maxActionCooldown: 1
   unitLayerIndex: 3
+  enemyLayerIndex: 8
   selectedUnitLayerIndex: 7
 --- !u!1001 &2758076488926814431
 PrefabInstance:
@@ -5231,6 +5399,11 @@ PrefabInstance:
       propertyPath: m_Parameters.colorGradient.m_NumColorKeys
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 3742235899559665641, guid: 5e5a5b0438dcc514fa1456f1cc29f746,
+        type: 3}
+      propertyPath: shootingVirtualCam
+      value: 
+      objectReference: {fileID: 594596459}
     - target: {fileID: 3893808597695861886, guid: 5e5a5b0438dcc514fa1456f1cc29f746,
         type: 3}
       propertyPath: m_Name
@@ -5256,6 +5429,12 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 5e5a5b0438dcc514fa1456f1cc29f746, type: 3}
+--- !u!4 &8520421511265712362 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1946119260069337644, guid: 5e5a5b0438dcc514fa1456f1cc29f746,
+    type: 3}
+  m_PrefabInstance: {fileID: 8520421511265712361}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -5279,3 +5458,4 @@ SceneRoots:
   - {fileID: 1706225404}
   - {fileID: 1831217995}
   - {fileID: 653128997}
+  - {fileID: 594596460}

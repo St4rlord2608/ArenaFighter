@@ -13,6 +13,7 @@ public class UnitActionManager : MonoBehaviour
     [SerializeField] private float maxActionCooldown = 1f;
     [Space]
     [SerializeField] private int unitLayerIndex = 3;
+    [SerializeField] private int enemyLayerIndex = 8;
     [SerializeField] private int selectedUnitLayerIndex = 7;
 
     private Unit selectedUnit;
@@ -69,19 +70,9 @@ public class UnitActionManager : MonoBehaviour
             {
                 if (!(currentActionCooldown <= maxActionCooldown))
                 {
-                    if (selectedAction.GetActionName() == Unit.MOVE_ACTION)
+                    if (selectedUnit.CanSpendActionPoints(selectedAction))
                     {
-                        if (selectedUnit.CanSpendActionPoints(selectedAction))
-                        {
-                            selectedAction.PerformAction(SetBusy, ClearBusy);
-                        }
-                    }
-                    else
-                    {
-                        if (selectedUnit.TryToSpendActionPointsToTakeAction(selectedAction))
-                        {
-                            selectedAction.PerformAction(SetBusy, ClearBusy);
-                        }
+                        selectedAction.PerformAction(SetBusy, ClearBusy);
                     }
 
                 }
@@ -160,5 +151,10 @@ public class UnitActionManager : MonoBehaviour
     public int GetUnitLayerIndex()
     {
         return unitLayerIndex;
+    }
+
+    public int GetEnemyLayerIndex()
+    {
+        return enemyLayerIndex;
     }
 }

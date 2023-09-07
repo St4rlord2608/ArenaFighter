@@ -9,11 +9,13 @@ public class Unit : MonoBehaviour
 {
     public const string MOVE_ACTION = "Move";
     public const string SPIN_ACTION = "Spin";
+    public const string SHOOT_ACTION = "Shoot";
 
     [SerializeField] private bool isEnemy = false;
     [Space]
     [SerializeField] private float maxMoveDistance = 10f;
     [SerializeField] private float maxSpinAmount = 2f;
+    [SerializeField] private float maxShootAmount = 1f;
 
     private MoveAction moveAction;
     private BaseAction[] baseActionArray;
@@ -21,6 +23,7 @@ public class Unit : MonoBehaviour
 
     private float availableMoveDistance;
     private float availableSpinAmount;
+    private float availableShootAmount;
 
     public static event EventHandler onAnyActionPointsChanged;
     private void Awake()
@@ -57,7 +60,14 @@ public class Unit : MonoBehaviour
         }
         else
         {
-            gameObject.layer = UnitActionManager.Instance.GetUnitLayerIndex();
+            if (isEnemy)
+            {
+                gameObject.layer = UnitActionManager.Instance.GetEnemyLayerIndex();
+            }
+            else
+            {
+                gameObject.layer = UnitActionManager.Instance.GetUnitLayerIndex();
+            }
             gridObstacle.enabled = true;
         }
     }
@@ -66,6 +76,7 @@ public class Unit : MonoBehaviour
     {
         availableMoveDistance = maxMoveDistance;
         availableSpinAmount = maxSpinAmount;
+        availableShootAmount = maxShootAmount;
     }
 
     public bool IsEnemy()
@@ -109,6 +120,12 @@ public class Unit : MonoBehaviour
                     return true;
                 }
                 break;
+            case SHOOT_ACTION:
+                if(availableShootAmount >= baseAction.GetActionPointsCost())
+                {
+                    return true;
+                }
+                break;
             default:
                 return false;
         }
@@ -125,6 +142,9 @@ public class Unit : MonoBehaviour
             case SPIN_ACTION:
                 availableSpinAmount -= baseAction.GetActionPointsCost();
                 break;
+                case SHOOT_ACTION:
+                availableShootAmount -= baseAction.GetActionPointsCost();
+                break;
         }
         onAnyActionPointsChanged?.Invoke(this, EventArgs.Empty);    
     }
@@ -140,6 +160,9 @@ public class Unit : MonoBehaviour
             case SPIN_ACTION:
                 availableSpinAmount = amount;
                 return;
+            case SHOOT_ACTION:
+                availableShootAmount = amount;
+                return;
         }
         onAnyActionPointsChanged?.Invoke(this, EventArgs.Empty);
     }
@@ -153,6 +176,9 @@ public class Unit : MonoBehaviour
 
                 case SPIN_ACTION:
                 return availableSpinAmount;
+
+                case SHOOT_ACTION:
+                return availableShootAmount;
         }
         return 0;
     }

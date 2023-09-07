@@ -43,5 +43,6 @@ public class SpinAction : BaseAction
     public override void PerformAction(Action onActionStart, Action onActionComplete)
     {
         ActionStart(onActionStart, onActionComplete);
+        unit.TryToSpendActionPointsToTakeAction(this);
     }
 }
