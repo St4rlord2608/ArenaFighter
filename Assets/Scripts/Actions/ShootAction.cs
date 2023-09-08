@@ -9,6 +9,7 @@ public class ShootAction : BaseAction
 {
     private enum ShootingState
     {
+        Positioning,
         Aiming,
         Shooting,
         Ending
@@ -17,25 +18,44 @@ public class ShootAction : BaseAction
     [SerializeField] private LayerMask shootableLayer;
     [SerializeField] private float rotationSpeed = 10f;
     [SerializeField] private float rotationOffset = 5f;
+    [SerializeField] private float positionTimer = 1f;
+    [SerializeField] private float aimTimer = 2f;
+    [SerializeField] private float endTimer = 1f;
     [Space]
     [SerializeField] private CinemachineVirtualCamera shootingVirtualCam;
     [SerializeField] private Transform shootingCameraAimPointTransform;
+    [Space]
+    [SerializeField] private AnimationEventHandler animationEventHandler;
 
     private Unit targetUnit;
     private ShootingState shootingState;
+    private bool isShooting = false;
+    private float stateTimer = 0f;
 
-    private float debugTimer = 0;
-
+    public event EventHandler onStartShooting;
+    public event EventHandler onStopShooting;
+    public event EventHandler onStartAiming;
+    public event EventHandler onStopAiming;
 
     protected override void Awake()
     {
         base.Awake();
         SetActionPointsCost(1);
-        shootingState = ShootingState.Aiming;
+        shootingState = ShootingState.Positioning;
+        animationEventHandler.OnFinish += AnimationEventHandler_OnFinish;
+    }
+
+    private void AnimationEventHandler_OnFinish(object sender, EventArgs e)
+    {
+        if(isShooting)
+        {
+            isShooting = false;
+        }
     }
 
     private void Update()
     {
+        Debug.Log(stateTimer);
         if (!isActive)
         {
             shootingVirtualCam.gameObject.SetActive(false);
@@ -43,33 +63,50 @@ public class ShootAction : BaseAction
         }
         switch (shootingState)
         {
-            case ShootingState.Aiming:
+            case ShootingState.Positioning:
+                stateTimer += Time.deltaTime;
                 var lookingDir = targetUnit.transform.position - transform.position;
                 var lookingRotation = Mathf.Atan2(lookingDir.x, lookingDir.z) * Mathf.Rad2Deg;
                 transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.Euler(new Vector3(transform.rotation.x, lookingRotation, transform.rotation.z)), rotationSpeed * Time.deltaTime);
                 var angleDifference = ((transform.rotation.eulerAngles.y - lookingRotation) + 360f) % 360;
-                if (angleDifference <= rotationOffset || angleDifference >= 360 - rotationOffset)
+                if ((angleDifference <= rotationOffset || angleDifference >= 360 - rotationOffset) && stateTimer >= positionTimer)
                 {
+                    stateTimer = 0;
+                    onStartAiming?.Invoke(this, EventArgs.Empty);
+                    shootingState = ShootingState.Aiming;
+                }
+                break;
+            case ShootingState.Aiming:
+                stateTimer += Time.deltaTime;
+                if (stateTimer >= aimTimer)
+                {
+                    stateTimer = 0;
+                    isShooting = true;
+                    onStopAiming?.Invoke(this, EventArgs.Empty);
+                    onStartShooting?.Invoke(this, EventArgs.Empty);
                     shootingState = ShootingState.Shooting;
                 }
                 break;
                 case ShootingState.Shooting:
-                if(debugTimer >= 5)
+                if(!isShooting)
                 {
-                    debugTimer = 0;
+                    onStopShooting?.Invoke(this, EventArgs.Empty);
                     shootingState = ShootingState.Ending;
-                }
-                else
-                {
-                    debugTimer += Time.deltaTime;
+                    UnitHealth targetUnitHealth = targetUnit.GetComponent<UnitHealth>();
+                    targetUnitHealth.Damage(1);
                 }
                 break;
                 case ShootingState.Ending:
-                debugTimer = 0;
-                shootingVirtualCam.gameObject.SetActive(false);
-                ActionComplete();
-                shootingState = ShootingState.Aiming;
-                unit.TryToSpendActionPointsToTakeAction(this);
+                stateTimer += Time.deltaTime;
+                if(stateTimer >= endTimer)
+                {
+                    stateTimer = 0;
+                    shootingVirtualCam.gameObject.SetActive(false);
+                    ActionComplete();
+                    shootingState = ShootingState.Aiming;
+                    unit.TryToSpendActionPointsToTakeAction(this);
+                }
+                
                 break;
         }
     }
