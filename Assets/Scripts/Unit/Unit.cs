@@ -16,6 +16,8 @@ public class Unit : MonoBehaviour
     [SerializeField] private float maxMoveDistance = 10f;
     [SerializeField] private float maxSpinAmount = 2f;
     [SerializeField] private float maxShootAmount = 1f;
+    [Space]
+    [SerializeField] private Transform targetPointTransform;
 
     private MoveAction moveAction;
     private BaseAction[] baseActionArray;
@@ -183,5 +185,9 @@ public class Unit : MonoBehaviour
         return 0;
     }
 
+    public Transform GetTargetPoint()
+    {
+        return targetPointTransform;
+    }
     
 }

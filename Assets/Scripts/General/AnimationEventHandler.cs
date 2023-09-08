@@ -6,6 +6,7 @@ using UnityEngine;
 public class AnimationEventHandler : MonoBehaviour
 {
     public event EventHandler OnFinish;
+    public event EventHandler OnShoot;
     public event EventHandler OnMagazineRemoved;
     public event EventHandler OnMagazineAttached;
     public event EventHandler OnLeftFootStep;
@@ -14,6 +15,11 @@ public class AnimationEventHandler : MonoBehaviour
     public event EventHandler OnRightFootStepRun;
     public event EventHandler OnPullReloadLever;
     public event EventHandler OnAttachMagazine;
+
+    private void AnimationShoot()
+    {
+        OnShoot?.Invoke(this, EventArgs.Empty);
+    }
     private void AnimationFinishedTrigger()
     {
         OnFinish?.Invoke(this, EventArgs.Empty);

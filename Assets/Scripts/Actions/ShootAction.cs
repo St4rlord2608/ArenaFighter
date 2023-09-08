@@ -26,6 +26,8 @@ public class ShootAction : BaseAction
     [SerializeField] private Transform shootingCameraAimPointTransform;
     [Space]
     [SerializeField] private AnimationEventHandler animationEventHandler;
+    [SerializeField] private Transform bulletProjectilePrefab;
+    [SerializeField] private Transform shootingPoint;
 
     private Unit targetUnit;
     private ShootingState shootingState;
@@ -43,6 +45,17 @@ public class ShootAction : BaseAction
         SetActionPointsCost(1);
         shootingState = ShootingState.Positioning;
         animationEventHandler.OnFinish += AnimationEventHandler_OnFinish;
+        animationEventHandler.OnShoot += AnimationEventHandler_OnShoot;
+    }
+
+    private void AnimationEventHandler_OnShoot(object sender, EventArgs e)
+    {
+        if(isShooting)
+        {
+            Transform bulletProjectileTransform = Instantiate(bulletProjectilePrefab, shootingPoint.position, Quaternion.identity);
+            BulletProjectile bulletProjectile = bulletProjectileTransform.GetComponent<BulletProjectile>();
+            bulletProjectile.Setup(targetUnit.GetTargetPoint().position);
+        }
     }
 
     private void AnimationEventHandler_OnFinish(object sender, EventArgs e)
@@ -55,7 +68,6 @@ public class ShootAction : BaseAction
 
     private void Update()
     {
-        Debug.Log(stateTimer);
         if (!isActive)
         {
             shootingVirtualCam.gameObject.SetActive(false);
@@ -103,7 +115,7 @@ public class ShootAction : BaseAction
                     stateTimer = 0;
                     shootingVirtualCam.gameObject.SetActive(false);
                     ActionComplete();
-                    shootingState = ShootingState.Aiming;
+                    shootingState = ShootingState.Positioning;
                     unit.TryToSpendActionPointsToTakeAction(this);
                 }
                 
