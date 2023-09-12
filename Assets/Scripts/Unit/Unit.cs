@@ -18,6 +18,7 @@ public class Unit : MonoBehaviour
     [SerializeField] private float maxShootAmount = 1f;
     [Space]
     [SerializeField] private Transform targetPointTransform;
+    [SerializeField] private Transform detectionPositionContainer;
 
     private MoveAction moveAction;
     private BaseAction[] baseActionArray;
@@ -26,6 +27,8 @@ public class Unit : MonoBehaviour
     private float availableMoveDistance;
     private float availableSpinAmount;
     private float availableShootAmount;
+
+    private float detectionAmount;
 
     public static event EventHandler onAnyActionPointsChanged;
     private void Awake()
@@ -189,5 +192,24 @@ public class Unit : MonoBehaviour
     {
         return targetPointTransform;
     }
-    
+
+    public Transform GetDetectionPositionContainer()
+    {
+        return detectionPositionContainer;
+    }
+
+    public void SetDetectionAmount(float detectionAmount)
+    {
+        this.detectionAmount = detectionAmount;
+    }
+
+    public float GetDetectionAmount()
+    {
+        return this.detectionAmount;
+    }
+
+    public float GetMaxDetectionAmount()
+    {
+        return detectionPositionContainer.childCount;
+    }
 }

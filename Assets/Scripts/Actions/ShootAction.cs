@@ -3,6 +3,7 @@ using Pathfinding;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.PackageManager;
 using UnityEngine;
 
 public class ShootAction : BaseAction
@@ -28,11 +29,14 @@ public class ShootAction : BaseAction
     [SerializeField] private AnimationEventHandler animationEventHandler;
     [SerializeField] private Transform bulletProjectilePrefab;
     [SerializeField] private Transform shootingPoint;
+    [Space]
+    [SerializeField] private LayerMask detectionLayerMask;
 
     private Unit targetUnit;
     private ShootingState shootingState;
     private bool isShooting = false;
     private float stateTimer = 0f;
+    private List<Transform> seeableEnemieList = new List<Transform>();
 
     public event EventHandler onStartShooting;
     public event EventHandler onStopShooting;
@@ -44,8 +48,51 @@ public class ShootAction : BaseAction
         base.Awake();
         SetActionPointsCost(1);
         shootingState = ShootingState.Positioning;
+        
+    }
+
+    private void Start()
+    {
         animationEventHandler.OnFinish += AnimationEventHandler_OnFinish;
         animationEventHandler.OnShoot += AnimationEventHandler_OnShoot;
+        UnitActionManager.Instance.onSelectedActionChanged += UnitActionManager_onSelectedActionChanged;
+    }
+
+    private void UnitActionManager_onSelectedActionChanged(object sender, EventArgs e)
+    {
+        if(UnitActionManager.Instance.GetSelectedAction() == this)
+        {
+            seeableEnemieList.Clear();
+            Collider[] nearbyColliders = Physics.OverlapSphere(transform.position, Mathf.Infinity);
+            foreach(Collider collider in nearbyColliders)
+            {
+                if(collider.gameObject.layer == UnitActionManager.Instance.GetEnemyLayerIndex())
+                {
+                    bool seesEnemy = false;
+                    float detectionAmount = 0;
+                    Unit enemyUnit = collider.transform.GetComponent<Unit>();
+                    foreach(Transform detectionPositionTransform in enemyUnit.GetDetectionPositionContainer())
+                    {
+                        Physics.Linecast(shootingPoint.position, detectionPositionTransform.position, out RaycastHit hitInfo, detectionLayerMask);
+                        if (hitInfo.transform == collider.transform)
+                        {
+                            seesEnemy = true;
+                            detectionAmount++;
+                        }
+                    }
+                    if (seesEnemy)
+                    {
+                        enemyUnit.SetDetectionAmount(detectionAmount);
+                        seeableEnemieList.Add(collider.transform);
+                    }
+                    else
+                    {
+                        enemyUnit.SetDetectionAmount(0);
+                    }
+                }
+            }
+            UnitShootSystemUI.Instance.CreateShootButtons(seeableEnemieList);
+        }
     }
 
     private void AnimationEventHandler_OnShoot(object sender, EventArgs e)
@@ -142,10 +189,31 @@ public class ShootAction : BaseAction
             {
                 targetUnit = unit;
             }
+            if(targetUnit != null && targetUnit.GetDetectionAmount() > 0)
+            {
+                ActionStart(onActionStart, onActionComplete);
+                shootingVirtualCam.gameObject.SetActive(true);
+                shootingVirtualCam.Follow = shootingCameraAimPointTransform;
+                shootingVirtualCam.LookAt = shootingCameraAimPointTransform;
+            }
+        }
+    }
+
+    public void AltPerformAction(Action onActionStart, Action onActionComplete, Transform enemyTransform)
+    {
+        Transform targetUnitTransform = enemyTransform;
+        if (targetUnitTransform.TryGetComponent<Unit>(out Unit unit))
+        {
+            targetUnit = unit;
+        }
+        if (targetUnit != null && targetUnit.GetDetectionAmount() > 0)
+        {
             ActionStart(onActionStart, onActionComplete);
             shootingVirtualCam.gameObject.SetActive(true);
             shootingVirtualCam.Follow = shootingCameraAimPointTransform;
             shootingVirtualCam.LookAt = shootingCameraAimPointTransform;
         }
     }
+
+    
 }

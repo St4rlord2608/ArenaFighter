@@ -70,10 +70,7 @@ public class UnitActionManager : MonoBehaviour
             {
                 if (!(currentActionCooldown <= maxActionCooldown))
                 {
-                    if (selectedUnit.CanSpendActionPoints(selectedAction))
-                    {
-                        selectedAction.PerformAction(SetBusy, ClearBusy);
-                    }
+                    TryToPerformAction();
 
                 }
 
@@ -83,6 +80,14 @@ public class UnitActionManager : MonoBehaviour
                 selectedAction.ActionSelectedVisual();
             }
 
+        }
+    }
+
+    public void TryToPerformAction()
+    {
+        if (selectedUnit.CanSpendActionPoints(selectedAction))
+        {
+            selectedAction.PerformAction(SetBusy, ClearBusy);
         }
     }
 
@@ -107,13 +112,13 @@ public class UnitActionManager : MonoBehaviour
         return false;
     }
 
-    private void ClearBusy()
+    public void ClearBusy()
     {
         isBusy = false;
         onBusyChanged?.Invoke(this, isBusy);
     }
 
-    private void SetBusy()
+    public void SetBusy()
     {
         isBusy = true;
         onBusyChanged?.Invoke(this, isBusy);
