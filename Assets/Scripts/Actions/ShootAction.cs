@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEditor.PackageManager;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class ShootAction : BaseAction
 {
@@ -29,14 +30,18 @@ public class ShootAction : BaseAction
     [SerializeField] private AnimationEventHandler animationEventHandler;
     [SerializeField] private Transform bulletProjectilePrefab;
     [SerializeField] private Transform shootingPoint;
+    [SerializeField] private Transform detectionStartPoint;
     [Space]
     [SerializeField] private LayerMask detectionLayerMask;
 
     private Unit targetUnit;
     private ShootingState shootingState;
     private bool isShooting = false;
+    private bool shotHitsTarget = false;
     private float stateTimer = 0f;
     private List<Transform> seeableEnemieList = new List<Transform>();
+    private SelectedVisual lastSelectedVisual;
+    private ShootButtonUI lastShootButtonUI;
 
     public event EventHandler onStartShooting;
     public event EventHandler onStopShooting;
@@ -60,7 +65,8 @@ public class ShootAction : BaseAction
 
     private void UnitActionManager_onSelectedActionChanged(object sender, EventArgs e)
     {
-        if(UnitActionManager.Instance.GetSelectedAction() == this)
+        ResetLastSelectedVisual();
+        if (UnitActionManager.Instance.GetSelectedAction() == this)
         {
             seeableEnemieList.Clear();
             Collider[] nearbyColliders = Physics.OverlapSphere(transform.position, Mathf.Infinity);
@@ -71,28 +77,35 @@ public class ShootAction : BaseAction
                     bool seesEnemy = false;
                     float detectionAmount = 0;
                     Unit enemyUnit = collider.transform.GetComponent<Unit>();
+                    enemyUnit.ResetSeeableDetectionPointList();
                     foreach(Transform detectionPositionTransform in enemyUnit.GetDetectionPositionContainer())
                     {
-                        Physics.Linecast(shootingPoint.position, detectionPositionTransform.position, out RaycastHit hitInfo, detectionLayerMask);
+                        Physics.Linecast(detectionStartPoint.position, detectionPositionTransform.position, out RaycastHit hitInfo, detectionLayerMask);
                         if (hitInfo.transform == collider.transform)
                         {
                             seesEnemy = true;
                             detectionAmount++;
+                            enemyUnit.AddSeeableDetectionPointToList(detectionPositionTransform);
                         }
                     }
                     if (seesEnemy)
                     {
-                        enemyUnit.SetDetectionAmount(detectionAmount);
+                        CalculateHitChance(detectionAmount, enemyUnit);
                         seeableEnemieList.Add(collider.transform);
                     }
                     else
                     {
-                        enemyUnit.SetDetectionAmount(0);
+                        CalculateHitChance(0, enemyUnit);
                     }
                 }
             }
             UnitShootSystemUI.Instance.CreateShootButtons(seeableEnemieList);
         }
+    }
+
+    public override void MouseOverUI()
+    {
+        ResetLastSelectedVisual();
     }
 
     private void AnimationEventHandler_OnShoot(object sender, EventArgs e)
@@ -101,7 +114,19 @@ public class ShootAction : BaseAction
         {
             Transform bulletProjectileTransform = Instantiate(bulletProjectilePrefab, shootingPoint.position, Quaternion.identity);
             BulletProjectile bulletProjectile = bulletProjectileTransform.GetComponent<BulletProjectile>();
-            bulletProjectile.Setup(targetUnit.GetTargetPoint().position);
+            if (shotHitsTarget)
+            {
+                List<Transform> detectionPointList = targetUnit.GetSeeableDetectionPointList();
+                Vector3 minHitPos = detectionPointList[0].position;
+                Vector3 maxHitPos = detectionPointList[detectionPointList.Count - 1].position;
+                Vector3 shootPos = new Vector3(Random.Range(minHitPos.x, maxHitPos.x), Random.Range(minHitPos.y, maxHitPos.y), Random.Range(minHitPos.z, maxHitPos.z));
+                bulletProjectile.Setup(shootPos);
+            }
+            else
+            {
+                bulletProjectile.Setup(targetUnit.GetTargetPoint().position + new Vector3(Random.Range(10f, -10f), Random.Range(10f, -10), 0));
+            }
+            
         }
     }
 
@@ -151,8 +176,12 @@ public class ShootAction : BaseAction
                 {
                     onStopShooting?.Invoke(this, EventArgs.Empty);
                     shootingState = ShootingState.Ending;
-                    UnitHealth targetUnitHealth = targetUnit.GetComponent<UnitHealth>();
-                    targetUnitHealth.Damage(1);
+                    if (shotHitsTarget)
+                    {
+                        UnitHealth targetUnitHealth = targetUnit.GetComponent<UnitHealth>();
+                        targetUnitHealth.Damage(1);
+                    }
+                    
                 }
                 break;
                 case ShootingState.Ending:
@@ -171,7 +200,29 @@ public class ShootAction : BaseAction
     }
     public override void ActionSelectedVisual()
     {
-
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        if (Physics.Raycast(ray, out RaycastHit hitInfo, Mathf.Infinity, shootableLayer))
+        {
+            Transform targetUnitTransform = hitInfo.transform;
+            if (targetUnitTransform.TryGetComponent<Unit>(out Unit unit))
+            {
+                targetUnit = unit;
+            }
+            if (targetUnit != null && targetUnit.GetHitChance() > 0)
+            {
+                if(lastSelectedVisual != null && lastSelectedVisual != targetUnit.GetSelectedVisual())
+                {
+                    ResetLastSelectedVisual();
+                }
+                lastSelectedVisual = targetUnit.GetSelectedVisual();
+                lastSelectedVisual.Show();
+                lastShootButtonUI = UnitShootSystemUI.Instance.GetShootButtonUIForUnit(targetUnit);
+                lastShootButtonUI.SetActive();
+            }
+        }else if(lastSelectedVisual != null)
+        {
+            ResetLastSelectedVisual();
+        }
     }
 
     public override string GetActionName()
@@ -185,29 +236,25 @@ public class ShootAction : BaseAction
         if (Physics.Raycast(ray, out RaycastHit hitInfo, Mathf.Infinity, shootableLayer))
         {
             Transform targetUnitTransform = hitInfo.transform;
-            if(targetUnitTransform.TryGetComponent<Unit>(out Unit unit))
-            {
-                targetUnit = unit;
-            }
-            if(targetUnit != null && targetUnit.GetDetectionAmount() > 0)
-            {
-                ActionStart(onActionStart, onActionComplete);
-                shootingVirtualCam.gameObject.SetActive(true);
-                shootingVirtualCam.Follow = shootingCameraAimPointTransform;
-                shootingVirtualCam.LookAt = shootingCameraAimPointTransform;
-            }
+            HandleShootAction(targetUnitTransform, onActionStart, onActionComplete);
         }
     }
 
     public void AltPerformAction(Action onActionStart, Action onActionComplete, Transform enemyTransform)
     {
         Transform targetUnitTransform = enemyTransform;
+        HandleShootAction(targetUnitTransform, onActionStart, onActionComplete);
+    }
+
+    private void HandleShootAction(Transform targetUnitTransform, Action onActionStart, Action onActionComplete)
+    {
         if (targetUnitTransform.TryGetComponent<Unit>(out Unit unit))
         {
             targetUnit = unit;
         }
-        if (targetUnit != null && targetUnit.GetDetectionAmount() > 0)
+        if (targetUnit != null && targetUnit.GetHitChance() > 0)
         {
+            ResetLastSelectedVisual();
             ActionStart(onActionStart, onActionComplete);
             shootingVirtualCam.gameObject.SetActive(true);
             shootingVirtualCam.Follow = shootingCameraAimPointTransform;
@@ -215,5 +262,37 @@ public class ShootAction : BaseAction
         }
     }
 
-    
+    private void ResetLastSelectedVisual()
+    {
+        if (lastSelectedVisual != null)
+        {
+            lastSelectedVisual.Hide();
+            lastSelectedVisual = null;
+            if(lastShootButtonUI != null)
+            {
+                lastShootButtonUI.SetInactive();
+                lastShootButtonUI = null;
+            }
+        }
+    }
+
+    private void CalculateHitChance(float detectionAmount, Unit enemyUnit)
+    {
+        float hitChance = (detectionAmount / enemyUnit.GetMaxDetectionAmount()) * 100;
+        enemyUnit.SetHitChance(hitChance);
+    }
+
+    override protected void ActionStart(Action onActionStart, Action onActionComplete)
+    {
+        float randomHitPercentage = Random.Range(0, 100);
+        if(randomHitPercentage <= targetUnit.GetHitChance())
+        {
+            shotHitsTarget = true;
+        }
+        else
+        {
+            shotHitsTarget = false;
+        }
+        base.ActionStart(onActionStart, onActionComplete);
+    }
 }

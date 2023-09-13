@@ -5,9 +5,12 @@ using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
+    public static CameraController Instance;
+
     [SerializeField] CinemachineVirtualCamera virtualCamera;
     [Space]
     [SerializeField] private float movementSpeed = 10f;
+    [SerializeField] private float aimTargetSpeed = 4f;
     [SerializeField] private float rotationSpeed = 100f;
     [Space]
     [SerializeField] private float minFollowYOffset = 2f;
@@ -16,6 +19,10 @@ public class CameraController : MonoBehaviour
     private CinemachineTransposer cinemachineTransposer;
     private Vector3 targetFollowOffset;
 
+    private void Awake()
+    {
+        Instance = this;
+    }
     private void Start()
     {
         cinemachineTransposer = virtualCamera.GetCinemachineComponent<CinemachineTransposer>();
@@ -34,6 +41,12 @@ public class CameraController : MonoBehaviour
         Vector2 inputVector = GameInput.Instance.GetMovementVectorNormalized();
         Vector3 movementVector = transform.forward * inputVector.y + transform.right * inputVector.x;
         transform.position += movementVector * Time.deltaTime * movementSpeed;
+    }
+
+    public bool MoveToPosition(Vector3 pos)
+    {
+        transform.position = Vector3.Lerp(transform.position, pos, Time.deltaTime * aimTargetSpeed);
+        return transform.position == pos;
     }
 
     private void HandleRotation()

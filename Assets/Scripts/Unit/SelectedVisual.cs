@@ -9,18 +9,33 @@ public class SelectedVisual : MonoBehaviour
     private void Start()
     {
         UnitActionManager.Instance.onSelectedUnitChanged += UnitActionManager_onSelectedUnitChanged;
-        gameObject.SetActive(false);
+        Hide();
     }
 
     private void UnitActionManager_onSelectedUnitChanged(object sender, System.EventArgs e)
     {
         if(UnitActionManager.Instance.GetSelectedUnit() != unit)
         {
-            gameObject.SetActive(false);
+            Hide();
         }
         else
         {
-            gameObject.SetActive(true);
+            Show();
         }
+    }
+
+    public void Show()
+    {
+        gameObject.SetActive(true);
+    }
+
+    public void Hide()
+    {
+        gameObject.SetActive(false);
+    }
+
+    private void OnDestroy()
+    {
+        UnitActionManager.Instance.onSelectedActionChanged -= UnitActionManager_onSelectedUnitChanged;
     }
 }

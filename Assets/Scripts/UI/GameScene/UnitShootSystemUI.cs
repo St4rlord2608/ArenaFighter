@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class UnitShootSystemUI : MonoBehaviour
 {
@@ -74,5 +75,18 @@ public class UnitShootSystemUI : MonoBehaviour
     public void Hide()
     {
         gameObject.SetActive(false);
+    }
+
+    public ShootButtonUI GetShootButtonUIForUnit(Unit unit)
+    {
+        foreach(Transform shootButton in shootButtonContainer)
+        {
+            ShootButtonUI shootButtonUI = shootButton.GetComponent<ShootButtonUI>();
+            if(shootButtonUI.GetEnemyUnit() == unit)
+            {
+                return shootButtonUI;
+            }
+        }
+        return new ShootButtonUI();
     }
 }

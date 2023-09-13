@@ -47,6 +47,10 @@ public class UnitActionManager : MonoBehaviour
 
         if(EventSystem.current.IsPointerOverGameObject())
         {
+            if(selectedAction != null)
+            {
+                selectedAction.MouseOverUI();
+            }
             return;
         }
         if(currentActionCooldown <= maxActionCooldown)
@@ -121,6 +125,7 @@ public class UnitActionManager : MonoBehaviour
     public void SetBusy()
     {
         isBusy = true;
+        SetSelectedAction(null);
         onBusyChanged?.Invoke(this, isBusy);
     }
 

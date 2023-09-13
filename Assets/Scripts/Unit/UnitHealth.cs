@@ -28,7 +28,10 @@ public class UnitHealth : MonoBehaviour
         {
             currentHealth = currentHealth,
         });
-
+        if(currentHealth <= 0)
+        {
+            Destroy(gameObject);
+        }
     }
 
     public void Heal(int healAmount)

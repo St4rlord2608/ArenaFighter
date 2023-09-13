@@ -26,7 +26,12 @@ public abstract class BaseAction : MonoBehaviour
 
     public abstract void ActionSelectedVisual();
 
-    protected void ActionStart(Action onActionStart, Action onActionComplete)
+    public virtual void MouseOverUI()
+    {
+
+    }
+
+    virtual protected void ActionStart(Action onActionStart, Action onActionComplete)
     {
         isActive = true;
         this.onActionComplete = onActionComplete;

@@ -19,6 +19,10 @@ public class Unit : MonoBehaviour
     [Space]
     [SerializeField] private Transform targetPointTransform;
     [SerializeField] private Transform detectionPositionContainer;
+    [Space]
+    [SerializeField] private SelectedVisual selectedVisual;
+
+    private List<Transform> seeableDetectionPointList = new List<Transform>();
 
     private MoveAction moveAction;
     private BaseAction[] baseActionArray;
@@ -28,7 +32,7 @@ public class Unit : MonoBehaviour
     private float availableSpinAmount;
     private float availableShootAmount;
 
-    private float detectionAmount;
+    private float hitChance;
 
     public static event EventHandler onAnyActionPointsChanged;
     private void Awake()
@@ -198,18 +202,38 @@ public class Unit : MonoBehaviour
         return detectionPositionContainer;
     }
 
-    public void SetDetectionAmount(float detectionAmount)
+    public void SetHitChance(float hitChance)
     {
-        this.detectionAmount = detectionAmount;
+        this.hitChance = hitChance;
     }
 
-    public float GetDetectionAmount()
+    public float GetHitChance()
     {
-        return this.detectionAmount;
+        return this.hitChance;
     }
 
     public float GetMaxDetectionAmount()
     {
         return detectionPositionContainer.childCount;
+    }
+
+    public void AddSeeableDetectionPointToList(Transform detectionPoint)
+    {
+        seeableDetectionPointList.Add(detectionPoint);
+    }
+
+    public void ResetSeeableDetectionPointList()
+    {
+        seeableDetectionPointList.Clear();
+    }
+
+    public List<Transform> GetSeeableDetectionPointList()
+    {
+        return seeableDetectionPointList;
+    }
+
+    public SelectedVisual GetSelectedVisual()
+    {
+        return selectedVisual;
     }
 }
